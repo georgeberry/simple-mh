@@ -4,6 +4,7 @@ from math import e
 import itertools
 from matplotlib.pylab import *
 import matplotlib.pyplot as plt
+import random
 
 '''
 metropolis-hastings implementation
@@ -196,7 +197,7 @@ class Metropolis:
         magnetism = np.array(magnetism)
         energy_avg = np.mean(energy)
         energy_sd = np.std(energy)
-        magnetism_avg = np.mean(magnetism)/(L + 1)^2
+        magnetism_avg = np.mean(magnetism)
         magnetism_sd = np.std(magnetism)
 
         self.ising_matrix = ising
@@ -228,7 +229,26 @@ class Metropolis:
         for k in range(self.N):
             if i == winner:
                 expectation += 1000
-            j = np.random.randint(max(i - delta, 0), min(i + delta + 1, 999))
+
+            if i - delta >= 0:
+                minimum = i - delta
+            else:
+                minimum = 1000 + (i - delta)
+
+            if i + delta <= 999:
+                maximum = i + delta
+            else:
+                maximum = i + delta - 1000
+
+            if minimum > maximum:
+                a = np.random.randint(minimum, 1000)
+                b = np.random.randint(0, maximum + 1)
+                j = random.choice([a,b])
+            elif minimum == maximum:
+                j = np.random.randint(0, 1000)
+            else:
+                j = np.random.randint(minimum, maximum)
+
             i = j
 
         return expectation/self.N
@@ -352,7 +372,7 @@ with plt.xkcd():
 plt.savefig("/Users/georgeberry/Desktop/ising/energy.pdf")
 
 ###boardwalk game
-m = Metropolis(N = 10000, burn_in = 0)
+m = Metropolis(N = 10000, burn_in = 500)
 
 for start_val in [10, 200, 350, 587]:
     for delta in [10, 100, 300, 500]:
